@@ -69,7 +69,9 @@ import java.util.function.Predicate;
 import javax.inject.Inject;
 
 /**
- * Connector operations
+ * Connector operations: Background information about Anypoint platform and Anypoint connector
+                         Details about how the Anypoint connector works
+                         What this java file does in particular
  */
 public class WebSocketOperations {
 
@@ -81,10 +83,10 @@ public class WebSocketOperations {
   /**
    * Sends the given {@code content} through the given {@code socket}
    *
-   * @param socketId            the id of the socket through which data is to be sent
-   * @param content             the content to be sent
+   * @param socketId            the socket id which sends data
+   * @param content             the content which gets sent
    * @param fluxCapacitor       the acting flux capacitor
-   * @param callback            completion callback
+   * @param callback            the completion callback
    * @param retryPolicyTemplate the reconnection policy
    */
   @Throws(DefaultErrorProvider.class)
@@ -97,6 +99,17 @@ public class WebSocketOperations {
     doSend(socketId, content, fluxCapacitor, callback, retryPolicyTemplate, retryPolicyTemplate.isEnabled());
   }
 
+   /**
+   * Processes the given {@code content} through the given {@code socket}. More detailed description with an example like the
+   * next method.
+   *
+   * @param socketId            the socket id which sends data
+   * @param content             the content which gets sent
+   * @param fluxCapacitor       the acting flux capacitor
+   * @param callback            the completion callback
+   * @param retryPolicyTemplate the reconnection policy
+   * @param reconnect           the value for deployment
+   */
   private void doSend(String socketId,
                       TypedValue<InputStream> content,
                       FluxCapacitor fluxCapacitor,
@@ -136,15 +149,15 @@ public class WebSocketOperations {
    * {@code groups} criteria. In the case of the path, the base path configured in the config will not be considered as you
    * may be targeting both inbound and outbound sockets.
    * <p>
-   * The message will be send to all the matching sockets, even though it's possible that delivery to some of them fail.
-   * The operation will return a list of {@link BroadcastFailure} containing details of each of the failures. If none fail, an
-   * empty list is returned
+   * The message sends to all the matching sockets, even though it's possible that delivery to some of them fail.
+   * The operation returns a list of {@link BroadcastFailure} containing details of each of the failures. If none fail, an
+   * empty list is returned.
    *
-   * @param content             the content to be sent
-   * @param fluxCapacitor       the acting {@link FluxCapacitor}
-   * @param path                the path of the sockets to be matched
-   * @param socketType          the type of sockets to be matched
-   * @param groups              matches sockets that belong to any of these groups
+   * @param content             the content to send
+   * @param fluxCapacitor       the active {@link FluxCapacitor}
+   * @param path                the path of the sockets which is matched
+   * @param socketType          the type of sockets which is matched
+   * @param groups              the groups which match sockets 
    * @param completionCallback  the {@link CompletionCallback}
    * @param retryPolicyTemplate the reconnection policy
    */
@@ -175,6 +188,18 @@ public class WebSocketOperations {
         });
   }
 
+ 
+  /**
+   * 
+   * Description
+   *
+   * @param fluxCapacitor       the active {@link FluxCapacitor}
+   * @param socketType          the type of sockets which is matched
+   * @param groups              the groups which match sockets 
+   * @param closeCode           the identifier that closes code
+   * @param reason              the String value for the statement
+   * @param completionCallback  the {@link CompletionCallback}
+   */
   @Throws(BroadcastErrorProvider.class)
   @Execution(BLOCKING)
   public void bulkCloseSockets(@Connection FluxCapacitor fluxCapacitor,
@@ -193,6 +218,13 @@ public class WebSocketOperations {
     });
   }
 
+  /**
+   * 
+   * Description
+   *
+   * @param socketType          the type of sockets which is matched
+   * @param groups              the groups which match sockets 
+   */
   private Predicate<WebSocket> newSocketFilter(BroadcastSocketType socketType, List<String> groups) {
     Predicate<WebSocket> filter = socketType.asFilter();
     if (!groups.isEmpty()) {
@@ -202,11 +234,12 @@ public class WebSocketOperations {
   }
 
   /**
-   * Opens a new outbound socket
+   * Opens a new outbound socket. Description about example cases of going through this function.
    *
-   * @param uriSettings              The path/url to connect to
+   * @param socketId                 The socket Id
+   * @param uriSettings              The path or url to which to connect
    * @param connectionRequestBuilder the request builder
-   * @param defaultGroups            the groups to which the socket should be initially subscribed
+   * @param defaultGroups            the groups to which the socket should initially subscribe
    * @param config                   the connector's config
    * @param fluxCapacitor            the acting flux capacitor
    * @param callback                 the completion callback
@@ -256,11 +289,11 @@ public class WebSocketOperations {
   }
 
   /**
-   * Closes the {@code socket}
+   * Closes the {@code socket}. Description on what it closes exactly and how. 
    *
    * @param socketId      the id of the socket to be closed
    * @param closeCode     the close code
-   * @param reason        the closing reason phrase
+   * @param reason        the String phrase reason for closing
    * @param fluxCapacitor the acting flux capacitor
    * @param callback      the completion callback
    */
@@ -286,7 +319,7 @@ public class WebSocketOperations {
   /**
    * Subscribes the socket of the given {@code socketId} to the given {@code groups}.
    * <p>
-   * This operation can be used on the same socket as many times as necessary, each use being additive over previous ones.
+   * This operation can be used on the same socket as many times as necessary, each use in addition to the previous ones.
    * <p>
    * Repeated groups will be ignored.
    * <p>
@@ -311,7 +344,7 @@ public class WebSocketOperations {
   /**
    * Unsubscribes the socket of the given {@code socketId} from the given {@code groups}.
    * <p>
-   * This operation can be used on the same socket as many times as necessary, each use being additive over previous ones.
+   * This operation can be used on the same socket as many times as necessary, each use in addition to the previous ones.
    * <p>
    * Works for both types INBOUND and OUTBOUND sockets.
    *
@@ -332,6 +365,12 @@ public class WebSocketOperations {
     }
   }
 
+  /**
+   * Description
+   *
+   * @param t              object for exception
+   */
+  @Throws(mapException)
   private Exception mapException(Throwable t) {
     if (t instanceof CompletionException) {
       t = t.getCause();
@@ -357,6 +396,14 @@ public class WebSocketOperations {
     return new ModuleException(t.getMessage(), errorType, t);
   }
 
+ 
+   /**
+   * Description
+   *
+   * @param uri              String value for path or URL
+   * @param clientSettings   object for exception
+   * @param requestBuilder   object for exception
+   */
   private HttpRequest buildHttpRequest(String uri,
                                        WebSocketClientSettings clientSettings,
                                        WebSocketRequestBuilder requestBuilder) {
@@ -375,7 +422,13 @@ public class WebSocketOperations {
 
     return builder.build();
   }
-
+  /**
+   * Description
+   *
+   * @param uri              String value for path or URL
+   * @param clientSettings   object for exception
+   * @param requestBuilder   object for exception
+   */
   private String resolveUri(WebSocketProtocol protocol, String host, Integer port, String path) {
     // Encode spaces to generate a valid HTTP request.
     return protocol.getScheme() + "://" + host + ":" + port + encodeSpaces(path);
